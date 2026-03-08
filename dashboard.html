@@ -1,0 +1,110 @@
+<!DOCTYPE html><html><head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="5">
+<title>SIMMS Live Monitor</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#c9d1d9;font-family:'SF Mono','Cascadia Code','Fira Code',monospace;font-size:13px}
+.wrap{max-width:1600px;margin:0 auto;padding:12px}
+header{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #21262d;margin-bottom:12px}
+header h1{font-size:16px;color:#58a6ff}
+.live{color:#3fb950;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.meta{font-size:11px;color:#8b949e}
+
+.top-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:12px;text-align:center}
+.stat .num{font-size:28px;font-weight:700;color:#58a6ff}
+.stat .lbl{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+.panels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.panel{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:12px;max-height:400px;overflow-y:auto}
+.panel h2{font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;position:sticky;top:0;background:#161b22;padding:2px 0}
+table{width:100%;border-collapse:collapse}
+td,th{padding:4px 6px;text-align:left;border-bottom:1px solid #21262d;font-size:12px}
+th{color:#8b949e;font-size:10px;text-transform:uppercase}
+.hash{color:#58a6ff;font-family:monospace}
+
+.status-line{padding:2px 0;font-size:12px;color:#f0883e}
+.status-ok{color:#3fb950;font-size:12px}
+
+.mini-bar{height:6px;background:#21262d;border-radius:3px;flex:1;overflow:hidden;width:100%}
+.mini-fill{height:100%;background:#58a6ff;border-radius:3px}
+
+.bottom-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.source{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px;font-size:11px}
+.source .name{color:#c9d1d9;font-weight:600;font-size:11px}
+.source .repo{color:#8b949e;font-size:9px;word-break:break-all}
+.source .cnt{color:#58a6ff;font-weight:700;font-size:16px;margin:4px 0}
+
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;margin:1px}
+.t-blue{background:#0d419d;color:#79c0ff}
+.t-green{background:#0f5323;color:#56d364}
+.t-purple{background:#3b1f6e;color:#bc8cff}
+.t-orange{background:#5a2d0c;color:#f0883e}
+
+.file-bars{margin-top:4px}
+.file-bar{display:flex;align-items:center;gap:6px;padding:2px 0}
+.file-bar .type{width:50px;text-align:right;color:#8b949e;font-size:11px}
+.file-bar .bar{flex:1;height:10px;background:#21262d;border-radius:3px;overflow:hidden}
+.file-bar .fill{height:100%;border-radius:3px}
+.file-bar .val{width:40px;font-size:11px;color:#8b949e}
+</style>
+</head><body>
+<div class="wrap">
+<header>
+  <h1>SIMMS LIVE MONITOR <span class="live">●</span></h1>
+  <div class="meta">
+    branch: <strong>claude/install-skills-folder-68Xez</strong> &nbsp;|&nbsp;
+    disk: 27M &nbsp;|&nbsp;
+    auto-refresh: 5s &nbsp;|&nbsp;
+    2026-03-08 01:07:42
+  </div>
+</header>
+
+<div class="top-grid">
+  <div class="stat"><div class="num">1,730</div><div class="lbl">Total Files</div></div>
+  <div class="stat"><div class="num">222</div><div class="lbl">Skills Defined</div></div>
+  <div class="stat"><div class="num">76</div><div class="lbl">Skill Folders</div></div>
+  <div class="stat"><div class="num">7</div><div class="lbl">Repos Installed</div></div>
+  <div class="stat"><div class="num">995</div><div class="lbl">Markdown Files</div></div>
+  <div class="stat"><div class="num">414</div><div class="lbl">Code/Schema</div></div>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <h2>Git Log (live)</h2>
+    <table><tr><td class="hash">ed385f2</td><td>Add live project monitor dashboard (auto-refresh every 5s)</td></tr><tr><td class="hash">d4c54db</td><td>Add VS Code preview monitor dashboard</td></tr><tr><td class="hash">08b0fab</td><td>Add awesome-claude-code-subagents collection (131 subagent skills)</td></tr><tr><td class="hash">a013b32</td><td>Add visual-media skill from miles990/claude-domain-skills</td></tr><tr><td class="hash">f5c7eae</td><td>Add official Anthropic skills collection (17 skills)</td></tr><tr><td class="hash">b34a686</td><td>Add claude-skills collection from alirezarezvani/claude-skills</td></tr><tr><td class="hash">1d8624f</td><td>Add Awesome Black Friday/Cyber Monday deals resource</td></tr><tr><td class="hash">ed4570e</td><td>Clean up import ordering in scanner.ts</td></tr><tr><td class="hash">a064973</td><td>Apply full scanner refactor with multi-line continuation support</td></tr><tr><td class="hash">06fea9b</td><td>Add marketing skills from coreyhaines31/marketingskills</td></tr><tr><td class="hash">1e0dc12</td><td>Refactor todo-cli modules for quality and performance</td></tr><tr><td class="hash">50a7b97</td><td>Add TODO tracker CLI tool</td></tr><tr><td class="hash">03c2e38</td><td>Fix project to work as standalone Remotion setup</td></tr><tr><td class="hash">c5ee1b7</td><td>Add remotion-dev/skills folder with Remotion skill rules</td></tr></table>
+  </div>
+  <div class="panel">
+    <h2>Working Tree Status</h2>
+    <div class="status-line">?? dashboard.html</div>
+    <h2 style="margin-top:12px">Last Commit</h2>
+    <div style="color:#c9d1d9;font-size:12px;padding:4px 0">ed385f2 Add live project monitor dashboard (auto-refresh every 5s) (86 seconds ago)</div>
+    <h2 style="margin-top:12px">File Types</h2>
+    <div class="file-bars">
+      <div class="file-bar"><span class="type">.md</span><div class="bar"><div class="fill" style="width:58%;background:#58a6ff"></div></div><span class="val">995</span></div>
+      <div class="file-bar"><span class="type">.py</span><div class="bar"><div class="fill" style="width:17%;background:#3572A5"></div></div><span class="val">297</span></div>
+      <div class="file-bar"><span class="type">.xsd</span><div class="bar"><div class="fill" style="width:7%;background:#f0883e"></div></div><span class="val">117</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Subagent Categories</h2>
+    <table>
+      <tr><th>Category</th><th>Distribution</th><th>#</th></tr>
+      <tr><td>01-core-development</td><td><div class="mini-bar"><div class="mini-fill" style="width:38%"></div></div></td><td>10</td></tr><tr><td>02-language-specialists</td><td><div class="mini-bar"><div class="mini-fill" style="width:100%"></div></div></td><td>26</td></tr><tr><td>03-infrastructure</td><td><div class="mini-bar"><div class="mini-fill" style="width:62%"></div></div></td><td>16</td></tr><tr><td>04-quality-security</td><td><div class="mini-bar"><div class="mini-fill" style="width:54%"></div></div></td><td>14</td></tr><tr><td>05-data-ai</td><td><div class="mini-bar"><div class="mini-fill" style="width:46%"></div></div></td><td>12</td></tr><tr><td>06-developer-experience</td><td><div class="mini-bar"><div class="mini-fill" style="width:50%"></div></div></td><td>13</td></tr><tr><td>07-specialized-domains</td><td><div class="mini-bar"><div class="mini-fill" style="width:46%"></div></div></td><td>12</td></tr><tr><td>08-business-product</td><td><div class="mini-bar"><div class="mini-fill" style="width:42%"></div></div></td><td>11</td></tr><tr><td>09-meta-orchestration</td><td><div class="mini-bar"><div class="mini-fill" style="width:38%"></div></div></td><td>10</td></tr><tr><td>10-research-analysis</td><td><div class="mini-bar"><div class="mini-fill" style="width:27%"></div></div></td><td>7</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="bottom-grid">
+  <div class="source"><div class="name">Remotion</div><div class="repo">remotion-dev/skills</div><div class="cnt">40+</div><span class="tag t-purple">video</span></div>
+  <div class="source"><div class="name">Marketing</div><div class="repo">coreyhaines31/marketingskills</div><div class="cnt">31</div><span class="tag t-orange">marketing</span></div>
+  <div class="source"><div class="name">BFCM</div><div class="repo">coreyhaines31/BFCM</div><div class="cnt">1</div><span class="tag t-green">deals</span></div>
+  <div class="source"><div class="name">Claude Skills</div><div class="repo">alirezarezvani/claude-skills</div><div class="cnt">65+</div><span class="tag t-green">engineering</span></div>
+  <div class="source"><div class="name">Anthropic</div><div class="repo">anthropics/skills</div><div class="cnt">17</div><span class="tag t-blue">official</span></div>
+  <div class="source"><div class="name">Visual Media</div><div class="repo">miles990/claude-domain-skills</div><div class="cnt">1</div><span class="tag t-purple">media</span></div>
+  <div class="source"><div class="name">Subagents</div><div class="repo">VoltAgent/subagents</div><div class="cnt">131</div><span class="tag t-blue">agents</span></div>
+</div>
+</div>
+</body></html>
