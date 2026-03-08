@@ -1,13 +1,16 @@
 {
-	"extends": "../tsconfig.settings.json",
 	"compilerOptions": {
+		"target": "ES2022",
 		"module": "Preserve",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"esModuleInterop": true,
 		"resolveJsonModule": false,
 		"skipLibCheck": true,
 		"jsx": "react-jsx",
-		"noEmit": true
+		"noEmit": true,
+		"strict": true,
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true
 	},
-	"include": ["./src", "./skills"],
-	"references": []
+	"include": ["./src", "./skills"]
 }
