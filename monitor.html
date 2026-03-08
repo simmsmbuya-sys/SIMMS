@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIMMS Project Monitor</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.5; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+  header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #21262d; margin-bottom: 24px; }
+  header h1 { font-size: 24px; color: #58a6ff; }
+  header .meta { font-size: 13px; color: #8b949e; }
+  header .meta span { margin-left: 16px; }
+  .badge { background: #238636; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .card { background: #161b22; border: 1px solid #21262d; border-radius: 8px; padding: 20px; }
+  .card h2 { font-size: 14px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .card .big-number { font-size: 42px; font-weight: 700; color: #58a6ff; }
+  .card .label { font-size: 13px; color: #8b949e; margin-top: 4px; }
+
+  .wide { grid-column: 1 / -1; }
+  .two-col { grid-template-columns: 1fr 1fr; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; border-bottom: 1px solid #21262d; }
+  td { padding: 8px 12px; border-bottom: 1px solid #21262d; font-size: 14px; }
+  tr:hover { background: #1c2128; }
+  td:last-child { text-align: right; }
+
+  .bar-container { display: flex; align-items: center; gap: 8px; }
+  .bar { height: 8px; border-radius: 4px; background: #21262d; flex: 1; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-label { font-size: 12px; color: #8b949e; min-width: 32px; text-align: right; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; margin: 2px; }
+  .tag-blue { background: #0d419d; color: #79c0ff; }
+  .tag-green { background: #0f5323; color: #56d364; }
+  .tag-purple { background: #3b1f6e; color: #bc8cff; }
+  .tag-orange { background: #5a2d0c; color: #f0883e; }
+  .tag-red { background: #5a1e1e; color: #f85149; }
+  .tag-teal { background: #0a3d3d; color: #39d2c0; }
+
+  .source-list { list-style: none; }
+  .source-list li { padding: 10px 0; border-bottom: 1px solid #21262d; display: flex; justify-content: space-between; align-items: center; }
+  .source-list li:last-child { border-bottom: none; }
+  .source-name { font-weight: 600; color: #c9d1d9; }
+  .source-repo { font-size: 12px; color: #8b949e; font-family: monospace; }
+  .source-count { font-weight: 700; color: #58a6ff; }
+
+  .skills-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+  .commit-hash { font-family: monospace; color: #58a6ff; font-size: 13px; }
+  .commit-msg { color: #c9d1d9; font-size: 13px; }
+  .commit-date { color: #8b949e; font-size: 12px; }
+
+  .section-title { font-size: 18px; color: #c9d1d9; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #21262d; }
+
+  .cli-card { background: #1c2128; border: 1px solid #30363d; border-radius: 6px; padding: 12px 16px; font-family: monospace; font-size: 13px; margin: 4px 0; }
+  .cli-card .cmd { color: #56d364; }
+  .cli-card .desc { color: #8b949e; font-size: 12px; }
+
+  .progress-ring { display: inline-flex; align-items: center; gap: 12px; }
+
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <h1>SIMMS Project Monitor</h1>
+    </div>
+    <div class="meta">
+      <span class="badge">ACTIVE</span>
+      <span>Branch: <code>claude/install-skills-folder-68Xez</code></span>
+      <span>Updated: 2026-03-08</span>
+    </div>
+  </header>
+
+  <!-- Top stats -->
+  <div class="grid">
+    <div class="card">
+      <h2>Total Files</h2>
+      <div class="big-number">1,764</div>
+      <div class="label">across all skills & tools</div>
+    </div>
+    <div class="card">
+      <h2>Skills Installed</h2>
+      <div class="big-number">222</div>
+      <div class="label">SKILL.md definitions</div>
+    </div>
+    <div class="card">
+      <h2>Repositories</h2>
+      <div class="big-number">7</div>
+      <div class="label">sources integrated</div>
+    </div>
+    <div class="card">
+      <h2>Skill Folders</h2>
+      <div class="big-number">76</div>
+      <div class="label">top-level directories</div>
+    </div>
+  </div>
+
+  <!-- Sources -->
+  <h3 class="section-title">Installed Sources</h3>
+  <div class="card">
+    <ul class="source-list">
+      <li>
+        <div><span class="source-name">Remotion Video Skills</span><br><span class="source-repo">remotion-dev/skills</span></div>
+        <div><span class="tag tag-purple">40+ rules</span></div>
+      </li>
+      <li>
+        <div><span class="source-name">Marketing Skills</span><br><span class="source-repo">coreyhaines31/marketingskills</span></div>
+        <div><span class="tag tag-orange">31 skills</span></div>
+      </li>
+      <li>
+        <div><span class="source-name">BFCM Deals</span><br><span class="source-repo">coreyhaines31/Awesome-Black-Friday-Cyber-Monday</span></div>
+        <div><span class="tag tag-teal">1 resource</span></div>
+      </li>
+      <li>
+        <div><span class="source-name">Claude Skills Collection</span><br><span class="source-repo">alirezarezvani/claude-skills</span></div>
+        <div><span class="tag tag-green">65+ skills</span></div>
+      </li>
+      <li>
+        <div><span class="source-name">Official Anthropic Skills</span><br><span class="source-repo">anthropics/skills</span></div>
+        <div><span class="tag tag-blue">17 skills</span></div>
+      </li>
+      <li>
+        <div><span class="source-name">Visual Media</span><br><span class="source-repo">miles990/claude-domain-skills</span></div>
+        <div><span class="tag tag-purple">1 skill</span></div>
+      </li>
+      <li>
+        <div><span class="source-name">Subagent Skills</span><br><span class="source-repo">VoltAgent/awesome-claude-code-subagents</span></div>
+        <div><span class="tag tag-red">131 skills</span></div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Subagent breakdown -->
+  <h3 class="section-title">Subagent Skills Breakdown (131)</h3>
+  <div class="card">
+    <table>
+      <tr><th>Category</th><th>Highlights</th><th>Count</th></tr>
+      <tr>
+        <td>01 &middot; Core Development</td>
+        <td><span class="tag tag-blue">fullstack</span><span class="tag tag-blue">frontend</span><span class="tag tag-blue">backend</span><span class="tag tag-blue">API</span><span class="tag tag-blue">mobile</span></td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td>02 &middot; Language Specialists</td>
+        <td><span class="tag tag-green">Python</span><span class="tag tag-green">TypeScript</span><span class="tag tag-green">Rust</span><span class="tag tag-green">Go</span><span class="tag tag-green">React</span><span class="tag tag-green">+21</span></td>
+        <td>26</td>
+      </tr>
+      <tr>
+        <td>03 &middot; Infrastructure</td>
+        <td><span class="tag tag-purple">DevOps</span><span class="tag tag-purple">Docker</span><span class="tag tag-purple">K8s</span><span class="tag tag-purple">Terraform</span><span class="tag tag-purple">SRE</span></td>
+        <td>16</td>
+      </tr>
+      <tr>
+        <td>04 &middot; Quality &amp; Security</td>
+        <td><span class="tag tag-red">code review</span><span class="tag tag-red">pentest</span><span class="tag tag-red">chaos eng</span><span class="tag tag-red">QA</span></td>
+        <td>14</td>
+      </tr>
+      <tr>
+        <td>05 &middot; Data &amp; AI</td>
+        <td><span class="tag tag-teal">ML</span><span class="tag tag-teal">NLP</span><span class="tag tag-teal">LLM</span><span class="tag tag-teal">MLOps</span><span class="tag tag-teal">Postgres</span></td>
+        <td>12</td>
+      </tr>
+      <tr>
+        <td>06 &middot; Developer Experience</td>
+        <td><span class="tag tag-orange">CLI</span><span class="tag tag-orange">refactor</span><span class="tag tag-orange">docs</span><span class="tag tag-orange">Git</span><span class="tag tag-orange">MCP</span></td>
+        <td>13</td>
+      </tr>
+      <tr>
+        <td>07 &middot; Specialized Domains</td>
+        <td><span class="tag tag-purple">blockchain</span><span class="tag tag-purple">IoT</span><span class="tag tag-purple">fintech</span><span class="tag tag-purple">gaming</span></td>
+        <td>12</td>
+      </tr>
+      <tr>
+        <td>08 &middot; Business &amp; Product</td>
+        <td><span class="tag tag-orange">PM</span><span class="tag tag-orange">scrum</span><span class="tag tag-orange">UX</span><span class="tag tag-orange">tech writing</span></td>
+        <td>11</td>
+      </tr>
+      <tr>
+        <td>09 &middot; Meta Orchestration</td>
+        <td><span class="tag tag-blue">multi-agent</span><span class="tag tag-blue">workflows</span><span class="tag tag-blue">task dist</span></td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td>10 &middot; Research &amp; Analysis</td>
+        <td><span class="tag tag-teal">market</span><span class="tag tag-teal">competitive</span><span class="tag tag-teal">trends</span><span class="tag tag-teal">scientific</span></td>
+        <td>7</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Anthropic Skills -->
+  <h3 class="section-title">Official Anthropic Skills (17)</h3>
+  <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+    <div class="card"><h2>canvas-design</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">83</div><div class="label">files &middot; fonts included</div></div>
+    <div class="card"><h2>docx</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">61</div><div class="label">files &middot; XML schemas</div></div>
+    <div class="card"><h2>pptx</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">59</div><div class="label">files &middot; PowerPoint</div></div>
+    <div class="card"><h2>xlsx</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">54</div><div class="label">files &middot; Excel</div></div>
+    <div class="card"><h2>claude-api</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">26</div><div class="label">files &middot; 7 languages</div></div>
+    <div class="card"><h2>skill-creator</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">18</div><div class="label">files &middot; eval framework</div></div>
+    <div class="card"><h2>theme-factory</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">13</div><div class="label">files &middot; 10 themes</div></div>
+    <div class="card"><h2>pdf</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">12</div><div class="label">files &middot; forms</div></div>
+    <div class="card"><h2>mcp-builder</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">10</div><div class="label">files &middot; Py &amp; Node</div></div>
+    <div class="card"><h2>slack-gif-creator</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">7</div><div class="label">files &middot; animations</div></div>
+    <div class="card"><h2>webapp-testing</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">6</div><div class="label">files &middot; Playwright</div></div>
+    <div class="card"><h2>internal-comms</h2><div style="font-size:24px;font-weight:700;color:#58a6ff;">6</div><div class="label">files &middot; templates</div></div>
+  </div>
+
+  <!-- File types -->
+  <h3 class="section-title">File Distribution</h3>
+  <div class="card">
+    <table>
+      <tr><th>Type</th><th>Bar</th><th>Count</th></tr>
+      <tr>
+        <td>Markdown (.md)</td>
+        <td><div class="bar-container"><div class="bar"><div class="bar-fill" style="width:56%;background:#58a6ff;"></div></div></div></td>
+        <td>996</td>
+      </tr>
+      <tr>
+        <td>Python (.py)</td>
+        <td><div class="bar-container"><div class="bar"><div class="bar-fill" style="width:17%;background:#3572A5;"></div></div></div></td>
+        <td>297</td>
+      </tr>
+      <tr>
+        <td>XML Schema (.xsd)</td>
+        <td><div class="bar-container"><div class="bar"><div class="bar-fill" style="width:7%;background:#f0883e;"></div></div></div></td>
+        <td>117</td>
+      </tr>
+      <tr>
+        <td>Fonts &amp; Binaries</td>
+        <td><div class="bar-container"><div class="bar"><div class="bar-fill" style="width:6%;background:#bc8cff;"></div></div></div></td>
+        <td>100+</td>
+      </tr>
+      <tr>
+        <td>Other (configs, shell, XML, TS)</td>
+        <td><div class="bar-container"><div class="bar"><div class="bar-fill" style="width:14%;background:#8b949e;"></div></div></div></td>
+        <td>254</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- TODO CLI -->
+  <h3 class="section-title">TODO Tracker CLI</h3>
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <h2>Commands</h2>
+        <div class="cli-card"><span class="cmd">todo-tracker list</span><br><span class="desc">List all TODOs (pretty/compact/json/count)</span></div>
+        <div class="cli-card"><span class="cmd">todo-tracker stats</span><br><span class="desc">Show statistics and breakdown</span></div>
+        <div class="cli-card"><span class="cmd">todo-tracker check</span><br><span class="desc">CI enforcement with policies</span></div>
+        <div class="cli-card"><span class="cmd">todo-tracker diff &lt;base&gt;</span><br><span class="desc">TODOs in changed files only</span></div>
+        <div class="cli-card"><span class="cmd">todo-tracker init</span><br><span class="desc">Create config file</span></div>
+      </div>
+      <div>
+        <h2>Features</h2>
+        <div class="skills-grid">
+          <span class="tag tag-green">multi-line TODOs</span>
+          <span class="tag tag-green">git blame</span>
+          <span class="tag tag-green">expiration dates</span>
+          <span class="tag tag-green">CI enforcement</span>
+          <span class="tag tag-green">assignees</span>
+          <span class="tag tag-green">stale detection</span>
+          <span class="tag tag-green">diff-aware</span>
+          <span class="tag tag-green">4 output formats</span>
+          <span class="tag tag-green">multi-language</span>
+          <span class="tag tag-green">.gitignore aware</span>
+        </div>
+        <h2 style="margin-top:16px;">Modules</h2>
+        <div class="skills-grid">
+          <span class="tag tag-blue">cli.ts</span>
+          <span class="tag tag-blue">scanner.ts</span>
+          <span class="tag tag-blue">formatter.ts</span>
+          <span class="tag tag-blue">git.ts</span>
+          <span class="tag tag-blue">config.ts</span>
+          <span class="tag tag-blue">types.ts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Git History -->
+  <h3 class="section-title">Git History</h3>
+  <div class="card">
+    <table>
+      <tr><th>Commit</th><th>Message</th></tr>
+      <tr><td><span class="commit-hash">d4c54db</span></td><td class="commit-msg">Add VS Code preview monitor dashboard</td></tr>
+      <tr><td><span class="commit-hash">08b0fab</span></td><td class="commit-msg">Add awesome-claude-code-subagents collection (131 subagent skills)</td></tr>
+      <tr><td><span class="commit-hash">a013b32</span></td><td class="commit-msg">Add visual-media skill from miles990/claude-domain-skills</td></tr>
+      <tr><td><span class="commit-hash">f5c7eae</span></td><td class="commit-msg">Add official Anthropic skills collection (17 skills)</td></tr>
+      <tr><td><span class="commit-hash">b34a686</span></td><td class="commit-msg">Add claude-skills collection from alirezarezvani/claude-skills</td></tr>
+      <tr><td><span class="commit-hash">1d8624f</span></td><td class="commit-msg">Add Awesome Black Friday/Cyber Monday deals resource</td></tr>
+      <tr><td><span class="commit-hash">a064973</span></td><td class="commit-msg">Apply full scanner refactor with multi-line continuation support</td></tr>
+      <tr><td><span class="commit-hash">06fea9b</span></td><td class="commit-msg">Add marketing skills from coreyhaines31/marketingskills</td></tr>
+      <tr><td><span class="commit-hash">1e0dc12</span></td><td class="commit-msg">Refactor todo-cli modules for quality and performance</td></tr>
+      <tr><td><span class="commit-hash">50a7b97</span></td><td class="commit-msg">Add TODO tracker CLI tool</td></tr>
+    </table>
+  </div>
+
+  <div style="text-align:center;padding:32px;color:#8b949e;font-size:12px;">
+    SIMMS Project Monitor &middot; 7 repos &middot; 222 skills &middot; 1,764 files
+  </div>
+
+</div>
+</body>
+</html>
