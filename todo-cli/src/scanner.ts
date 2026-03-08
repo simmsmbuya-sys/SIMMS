@@ -4,7 +4,7 @@ import fg from 'fast-glob';
 import ignoreFactory from 'ignore';
 const ignore = ignoreFactory.default ?? ignoreFactory;
 import { Config, TodoItem, TodoWithBlame, ScanResult } from './types.js';
-import { getBlameForLine } from './git.js';
+import { getBlameForFile } from './git.js';
 
 function buildPattern(tags: string[]): RegExp {
 	const tagGroup = tags.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
@@ -35,7 +35,11 @@ function isBinaryExtension(file: string): boolean {
 	return BINARY_EXTENSIONS.has(file.slice(dot).toLowerCase());
 }
 
-export async function scanFiles(cwd: string, config: Config): Promise<ScanResult> {
+export interface ScanOptions {
+	skipBlame?: boolean;
+}
+
+export async function scanFiles(cwd: string, config: Config, options?: ScanOptions): Promise<ScanResult> {
 	const start = Date.now();
 
 	// Load .gitignore
@@ -87,6 +91,9 @@ export async function scanFiles(cwd: string, config: Config): Promise<ScanResult
 		filesScanned++;
 		const lines = content.split('\n');
 
+		// Collect all TODO items from this file first
+		const fileTodos: TodoWithBlame[] = [];
+
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			const match = pattern.exec(line);
@@ -102,7 +109,7 @@ export async function scanFiles(cwd: string, config: Config): Promise<ScanResult
 
 			const expMatch = EXPIRATION_RE.exec(parenContent ?? '') || EXPIRATION_RE.exec(text);
 
-			const item: TodoWithBlame = {
+			fileTodos.push({
 				file: relative(cwd, fullPath),
 				line: i + 1,
 				tag,
@@ -110,18 +117,23 @@ export async function scanFiles(cwd: string, config: Config): Promise<ScanResult
 				assignee,
 				expiration: expMatch?.[1],
 				raw: line.trim(),
-			};
-
-			// Try to get git blame info
-			const blame = getBlameForLine(cwd, file, i + 1);
-			if (blame) {
-				item.author = blame.author;
-				item.date = blame.date;
-				item.ageDays = blame.ageDays;
-			}
-
-			todos.push(item);
+			});
 		}
+
+		// Batch-blame the entire file once, then attach info to each TODO
+		if (fileTodos.length > 0 && !options?.skipBlame) {
+			const blameMap = getBlameForFile(cwd, file);
+			for (const item of fileTodos) {
+				const blame = blameMap.get(item.line);
+				if (blame) {
+					item.author = blame.author;
+					item.date = blame.date;
+					item.ageDays = blame.ageDays;
+				}
+			}
+		}
+
+		todos.push(...fileTodos);
 	}
 
 	return {
