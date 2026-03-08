@@ -2,12 +2,12 @@ import { readFileSync, statSync } from 'node:fs';
 import { relative } from 'node:path';
 import fg from 'fast-glob';
 import ignoreFactory from 'ignore';
+import { Config, TodoItem, TodoWithBlame, ScanResult } from './types.js';
+import { getBlameForFile } from './git.js';
 
 // Under Node16 CJS/ESM interop the default export may be double-wrapped.
 // Resolve to the callable factory at runtime.
 const ignore = ignoreFactory.default ?? ignoreFactory;
-import { Config, TodoItem, TodoWithBlame, ScanResult } from './types.js';
-import { getBlameForFile } from './git.js';
 
 // ---------------------------------------------------------------------------
 // Constants
