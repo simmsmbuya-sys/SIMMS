@@ -37,10 +37,24 @@ export const registerDevice = mutation({
 export const updateDeviceStatus = mutation({
   args: {
     id: v.id("rfidDevices"),
+    orgId: v.string(),
     status: v.union(v.literal("active"), v.literal("inactive"), v.literal("maintenance")),
   },
-  handler: async (ctx, { id, status }) => {
+  handler: async (ctx, { id, orgId, status }) => {
+    const device = await ctx.db.get(id);
+    if (!device) throw new Error("Device not found");
+    if (device.orgId !== orgId) throw new Error("Access denied");
     await ctx.db.patch(id, { status });
+  },
+});
+
+export const deleteDevice = mutation({
+  args: { id: v.id("rfidDevices"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const device = await ctx.db.get(id);
+    if (!device) throw new Error("Device not found");
+    if (device.orgId !== orgId) throw new Error("Access denied");
+    await ctx.db.patch(id, { status: "inactive" });
   },
 });
 
@@ -54,6 +68,17 @@ export const recordScan = mutation({
     signalStrength: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // Verify device exists, is active, and belongs to org
+    const device = await ctx.db.get(args.deviceId);
+    if (!device) throw new Error("RFID device not found");
+    if (device.orgId !== args.orgId) throw new Error("Access denied");
+    if (device.status !== "active") throw new Error("Device is not active");
+
+    // Validate signal strength if provided
+    if (args.signalStrength !== undefined && (args.signalStrength < -100 || args.signalStrength > 0)) {
+      throw new Error("Signal strength must be between -100 and 0 dBm");
+    }
+
     // Update device last seen
     await ctx.db.patch(args.deviceId, { lastSeen: Date.now() });
 

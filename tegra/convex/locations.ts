@@ -11,6 +11,15 @@ export const list = query({
   },
 });
 
+export const getById = query({
+  args: { id: v.id("locations"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const location = await ctx.db.get(id);
+    if (!location || location.orgId !== orgId) return null;
+    return location;
+  },
+});
+
 export const create = mutation({
   args: {
     orgId: v.string(),
@@ -31,15 +40,30 @@ export const create = mutation({
 export const update = mutation({
   args: {
     id: v.id("locations"),
+    orgId: v.string(),
     name: v.optional(v.string()),
     address: v.optional(v.string()),
     phone: v.optional(v.string()),
     isActive: v.optional(v.boolean()),
   },
-  handler: async (ctx, { id, ...updates }) => {
+  handler: async (ctx, { id, orgId, ...updates }) => {
+    const location = await ctx.db.get(id);
+    if (!location) throw new Error("Location not found");
+    if (location.orgId !== orgId) throw new Error("Access denied");
     const filtered = Object.fromEntries(
       Object.entries(updates).filter(([, val]) => val !== undefined)
     );
     await ctx.db.patch(id, filtered);
+  },
+});
+
+export const deleteLocation = mutation({
+  args: { id: v.id("locations"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const location = await ctx.db.get(id);
+    if (!location) throw new Error("Location not found");
+    if (location.orgId !== orgId) throw new Error("Access denied");
+    // Soft-delete
+    await ctx.db.patch(id, { isActive: false });
   },
 });

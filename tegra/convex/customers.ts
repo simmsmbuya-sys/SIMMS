@@ -17,6 +17,15 @@ export const list = query({
   },
 });
 
+export const getById = query({
+  args: { id: v.id("customers"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const customer = await ctx.db.get(id);
+    if (!customer || customer.orgId !== orgId) return null;
+    return customer;
+  },
+});
+
 export const create = mutation({
   args: {
     orgId: v.string(),
@@ -40,6 +49,7 @@ export const create = mutation({
 export const update = mutation({
   args: {
     id: v.id("customers"),
+    orgId: v.string(),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
@@ -48,7 +58,10 @@ export const update = mutation({
     address: v.optional(v.string()),
     notes: v.optional(v.string()),
   },
-  handler: async (ctx, { id, ...updates }) => {
+  handler: async (ctx, { id, orgId, ...updates }) => {
+    const customer = await ctx.db.get(id);
+    if (!customer) throw new Error("Customer not found");
+    if (customer.orgId !== orgId) throw new Error("Access denied");
     const filtered = Object.fromEntries(
       Object.entries(updates).filter(([, val]) => val !== undefined)
     );
@@ -56,9 +69,23 @@ export const update = mutation({
   },
 });
 
+export const deleteCustomer = mutation({
+  args: { id: v.id("customers"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const customer = await ctx.db.get(id);
+    if (!customer) throw new Error("Customer not found");
+    if (customer.orgId !== orgId) throw new Error("Access denied");
+    await ctx.db.delete(id);
+  },
+});
+
 export const getHistory = query({
   args: { orgId: v.string(), customerId: v.id("customers") },
   handler: async (ctx, { orgId, customerId }) => {
+    // Verify customer belongs to org
+    const customer = await ctx.db.get(customerId);
+    if (!customer || customer.orgId !== orgId) return [];
+
     return await ctx.db
       .query("transactions")
       .withIndex("by_customer", (q) => q.eq("orgId", orgId).eq("customerId", customerId))

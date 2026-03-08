@@ -19,6 +19,15 @@ export const listTransactions = query({
   },
 });
 
+export const getTransaction = query({
+  args: { id: v.id("transactions"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const tx = await ctx.db.get(id);
+    if (!tx || tx.orgId !== orgId) return null;
+    return tx;
+  },
+});
+
 export const createTransaction = mutation({
   args: {
     orgId: v.string(),
@@ -43,6 +52,28 @@ export const createTransaction = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Validate items
+    for (const item of args.items) {
+      if (item.quantity <= 0) throw new Error(`Invalid quantity for ${item.name}`);
+      if (item.unitPrice < 0) throw new Error(`Invalid price for ${item.name}`);
+    }
+
+    // For sales, check stock availability
+    if (args.type === "sale") {
+      for (const item of args.items) {
+        const stockLevel = await ctx.db
+          .query("stockLevels")
+          .withIndex("by_product_location", (q) =>
+            q.eq("orgId", args.orgId).eq("productId", item.productId).eq("locationId", args.locationId)
+          )
+          .first();
+        const available = stockLevel ? stockLevel.quantity - stockLevel.reservedQty : 0;
+        if (available < item.quantity) {
+          throw new Error(`Insufficient stock for ${item.name} (available: ${available}, requested: ${item.quantity})`);
+        }
+      }
+    }
+
     const receiptNumber = `REC-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
     const txId = await ctx.db.insert("transactions", {
@@ -67,6 +98,16 @@ export const createTransaction = mutation({
           quantity: existing.quantity + (item.quantity * multiplier),
           lastUpdated: Date.now(),
         });
+      } else {
+        // Create stock level record if it doesn't exist (for refunds/exchanges)
+        await ctx.db.insert("stockLevels", {
+          orgId: args.orgId,
+          productId: item.productId,
+          locationId: args.locationId,
+          quantity: item.quantity * multiplier,
+          reservedQty: 0,
+          lastUpdated: Date.now(),
+        });
       }
     }
 
@@ -85,8 +126,42 @@ export const createTransaction = mutation({
 });
 
 export const voidTransaction = mutation({
-  args: { id: v.id("transactions") },
-  handler: async (ctx, { id }) => {
+  args: { id: v.id("transactions"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const tx = await ctx.db.get(id);
+    if (!tx) throw new Error("Transaction not found");
+    if (tx.orgId !== orgId) throw new Error("Access denied");
+    if (tx.status === "voided") throw new Error("Transaction already voided");
+    if (tx.status !== "completed") throw new Error("Can only void completed transactions");
+
+    // Reverse stock changes
+    for (const item of tx.items) {
+      const reverseMultiplier = tx.type === "sale" ? 1 : -1;
+      const stockLevel = await ctx.db
+        .query("stockLevels")
+        .withIndex("by_product_location", (q) =>
+          q.eq("orgId", orgId).eq("productId", item.productId).eq("locationId", tx.locationId)
+        )
+        .first();
+
+      if (stockLevel) {
+        await ctx.db.patch(stockLevel._id, {
+          quantity: stockLevel.quantity + (item.quantity * reverseMultiplier),
+          lastUpdated: Date.now(),
+        });
+      }
+    }
+
+    // Reverse customer spend
+    if (tx.customerId && tx.type === "sale") {
+      const customer = await ctx.db.get(tx.customerId);
+      if (customer) {
+        await ctx.db.patch(tx.customerId, {
+          totalSpend: Math.max(0, customer.totalSpend - tx.total),
+        });
+      }
+    }
+
     await ctx.db.patch(id, { status: "voided" });
   },
 });

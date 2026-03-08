@@ -47,9 +47,37 @@ export const create = mutation({
   },
 });
 
+export const startCounting = mutation({
+  args: { id: v.id("stocktakes"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const stocktake = await ctx.db.get(id);
+    if (!stocktake) throw new Error("Stocktake not found");
+    if (stocktake.orgId !== orgId) throw new Error("Access denied");
+    if (stocktake.status !== "draft") throw new Error("Can only start counting from draft status");
+    await ctx.db.patch(id, { status: "in_progress" });
+  },
+});
+
+export const cancel = mutation({
+  args: { id: v.id("stocktakes"), orgId: v.string() },
+  handler: async (ctx, { id, orgId }) => {
+    const stocktake = await ctx.db.get(id);
+    if (!stocktake) throw new Error("Stocktake not found");
+    if (stocktake.orgId !== orgId) throw new Error("Access denied");
+    if (["completed", "cancelled"].includes(stocktake.status)) {
+      throw new Error("Cannot cancel a completed or already cancelled stocktake");
+    }
+    await ctx.db.patch(id, { status: "cancelled" });
+  },
+});
+
 export const getItems = query({
-  args: { stocktakeId: v.id("stocktakes") },
-  handler: async (ctx, { stocktakeId }) => {
+  args: { stocktakeId: v.id("stocktakes"), orgId: v.string() },
+  handler: async (ctx, { stocktakeId, orgId }) => {
+    // Verify ownership
+    const stocktake = await ctx.db.get(stocktakeId);
+    if (!stocktake || stocktake.orgId !== orgId) return [];
+
     return await ctx.db
       .query("stocktakeItems")
       .withIndex("by_stocktake", (q) => q.eq("stocktakeId", stocktakeId))
@@ -60,25 +88,34 @@ export const getItems = query({
 export const updateCount = mutation({
   args: {
     id: v.id("stocktakeItems"),
+    orgId: v.string(),
     countedQty: v.number(),
     notes: v.optional(v.string()),
   },
-  handler: async (ctx, { id, countedQty, notes }) => {
+  handler: async (ctx, { id, orgId, countedQty, notes }) => {
+    if (countedQty < 0) throw new Error("Counted quantity cannot be negative");
+
     const item = await ctx.db.get(id);
     if (!item) throw new Error("Stocktake item not found");
+    if (item.orgId !== orgId) throw new Error("Access denied");
+
     await ctx.db.patch(id, {
       countedQty,
       discrepancy: countedQty - item.expectedQty,
-      ...(notes ? { notes } : {}),
+      ...(notes !== undefined ? { notes } : {}),
     });
   },
 });
 
 export const complete = mutation({
-  args: { id: v.id("stocktakes"), applyAdjustments: v.boolean() },
-  handler: async (ctx, { id, applyAdjustments }) => {
+  args: { id: v.id("stocktakes"), orgId: v.string(), applyAdjustments: v.boolean() },
+  handler: async (ctx, { id, orgId, applyAdjustments }) => {
     const stocktake = await ctx.db.get(id);
     if (!stocktake) throw new Error("Stocktake not found");
+    if (stocktake.orgId !== orgId) throw new Error("Access denied");
+    if (stocktake.status !== "in_progress") {
+      throw new Error("Can only complete a stocktake that is in progress");
+    }
 
     if (applyAdjustments) {
       const items = await ctx.db
