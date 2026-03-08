@@ -21,7 +21,6 @@ import {
   Smartphone,
   ArrowUpRight,
   ArrowDownRight,
-  MoreHorizontal,
   Eye,
 } from 'lucide-react';
 
@@ -157,12 +156,12 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
   }),
 };
 
 export default function Dashboard() {
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const [, setHoveredRow] = useState<string | null>(null);
 
   return (
     <div>
@@ -265,7 +264,7 @@ export default function Dashboard() {
                     color: '#e2e8f0',
                     fontSize: 13,
                   }}
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                  formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
                 />
                 <Area
                   type="monotone"

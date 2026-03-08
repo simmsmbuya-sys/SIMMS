@@ -19,7 +19,6 @@ import {
   Download,
   Calendar,
   TrendingUp,
-  TrendingDown,
   DollarSign,
   Package,
   ShoppingCart,
@@ -145,7 +144,7 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
   }),
 };
 
@@ -161,8 +160,8 @@ const tooltipStyle = {
 
 // ──────────────────────────────── CUSTOM PIE LABEL ──────────────────────────
 
-const renderPieLabel = ({ name, percent }: { name: string; percent: number }) =>
-  `${name} (${(percent * 100).toFixed(0)}%)`;
+const renderPieLabel = ({ name, percent }: { name?: string; percent?: number }) =>
+  `${name ?? ''} (${((percent ?? 0) * 100).toFixed(0)}%)`;
 
 // ──────────────────────────────── COMPONENT ─────────────────────────────────
 
@@ -279,7 +278,7 @@ export default function Reports() {
                   />
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Revenue']}
+                    formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
                   />
                   <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} barSize={36} />
                 </BarChart>
@@ -316,7 +315,7 @@ export default function Reports() {
                     </Pie>
                     <Tooltip
                       contentStyle={tooltipStyle}
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, 'Sales']}
+                      formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Sales']}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -626,7 +625,7 @@ export default function Reports() {
                       outerRadius={110}
                       innerRadius={60}
                       dataKey="value"
-                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ''} (${((percent ?? 0) * 100).toFixed(0)}%)`}
                       labelLine={{ stroke: '#94a3b8' }}
                     >
                       {expenseBreakdown.map((entry, idx) => (
@@ -635,7 +634,7 @@ export default function Reports() {
                     </Pie>
                     <Tooltip
                       contentStyle={tooltipStyle}
-                      formatter={(value: number) => [`$${value.toLocaleString()}`, 'Amount']}
+                      formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Amount']}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -726,7 +725,7 @@ export default function Reports() {
                   />
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(value: number) => [`$${value.toLocaleString()}`, '']}
+                    formatter={(value) => [`$${Number(value).toLocaleString()}`, '']}
                   />
                   <Legend />
                   <Line

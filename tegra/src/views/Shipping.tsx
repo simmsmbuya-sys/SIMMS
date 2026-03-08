@@ -6,7 +6,6 @@ import {
   ArrowDownLeft,
   ArrowLeftRight,
   Package,
-  Clock,
   CheckCircle2,
   AlertTriangle,
   Plus,
@@ -306,7 +305,7 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
   }),
 };
 
